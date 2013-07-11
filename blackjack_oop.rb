@@ -42,48 +42,43 @@ class Deck
   def  scramble!
     cards.shuffle!
   end
-  binding.pry
-  def del_one
-   p cards.pop
+  def deal_one
+    cards.pop
   end
 
 end
 
 ######################  HAND  ################################
 
-# it should work like abstract class or something
+# it should work like abstract class or something similar
 
-class Hand
+module Hand
+
 
   def initialize
     @deck = Deck.new
   end
 
+  def getting_one_hand
+    player_cards << @deck.deal_one
+  end
 
-  def asking_4_a_hand
-      @deck.del_one
+  #binding.pry
+  def showing_last_item
+    "You have: #{player_cards[0]} and #{player_cards[1]}"
   end
 end
 
 ###################### PLAYER  ################################
 
 class Player
-  attr_accessor :my_cards
+  include Hand
+  attr_accessor :player_cards
 
-  def initialize
-
-    #@person
-    @hand = Hand.new
-    @my_cards = []
-  end
-   binding.pry
-
-  def getting_one_hand
-    @my_cards << @hand.asking_4_a_hand
-  end
-
-  def showing_last_item
-    puts "You have: #{my_cards[0]} and #{my_cards[1]}"
+  def initialize (n)
+    # @person
+    @player_cards = []
+    @name = n
   end
 
 end
@@ -91,26 +86,22 @@ end
 ###################### DEALER   ################################
 
 class Dealer
-    attr_accessor :dealer_cards
+  include Hand
+  attr_accessor :dealer_cards
   def initialize
-    @hand = Hand.new
     @dealer_cards = []
   end
 
-  def getting_one_hand
-    @dealer_cards << @hand.asking_4_a_hand
-
-  end
-
-  def showing_last_item
-    puts "You have: #{dealer_cards[0]} and #{dealer_cards[1]}"
-  end
 end
 
 ######################  BLACKJACK ################################
 
+player1 = Player.new('fer')
+player1.getting_one_hand
+player1.showing_last_item
 
 # running the app
+=begin
 
 class BlackJack
 
@@ -120,7 +111,7 @@ class BlackJack
     @dealer = Dealer.new
   end
 
-  def gameOn
+  def game_On
     lets_start
     showing_cards
     #p 'It \'s working'
@@ -131,14 +122,16 @@ class BlackJack
   end
 
   def showing_cards
+    @player.getting_one_hand
     @player.showing_last_item
-    @dealer.showing_last_item
+    #@dealer.getting_one_hand
+    #@dealer.showing_last_item
 
   end
 
   def calculate_total (obj)
 
-=begin
+
 
     # [['H', '3'], ['S', 'Q'], ... ]
     arr = cards.map{|e| e[1] }
@@ -160,15 +153,40 @@ class BlackJack
     end
 
     total
-=end
+
 
 
   end
 
 end
-
- my_game = BlackJack.new
-
-my_game.gameOn
+=end
 
 # It's not posssible to do this:  puts deck.cards.pretty_output (inheritance)
+
+
+=begin
+class Computer
+  @@users = {}
+  def initialize (username, password)
+    @username = username
+    @password = password
+    @files = {}
+    @@users[username] = password
+  end
+
+  def create (filename)
+    time= Time.now
+    files[filename] = time
+
+    puts 'A new file has created: '
+
+  end
+
+  def Computer.get_users
+    @@users
+  end
+end
+
+my_computer = Computer.new('fer', 123)
+
+=end
