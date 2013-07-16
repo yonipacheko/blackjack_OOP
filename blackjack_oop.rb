@@ -3,7 +3,7 @@ require 'pry'
 ######################## CARD  ##############################
 
 class Card
-  attr_accessor :suit,  :face_value
+  attr_accessor :suit, :face_value
 
   def initialize (s, fv)
     @suit = s
@@ -12,10 +12,10 @@ class Card
 
 
   def pretty_output
-     "The face #{@suit}  of #{@face_value}"
+    "The face #{@suit}  of #{@face_value}"
   end
 
-  def to_s       #formating the object
+  def to_s #formating the object
     pretty_output
   end
 
@@ -38,11 +38,14 @@ class Deck
     end
     #shuffling deck
     scramble!
-  end # ends initialize
+  end
 
-  def   scramble!
+  # ends initialize
+
+  def scramble!
     cards.shuffle!
   end
+
   def deal_one
     cards.pop
   end
@@ -51,7 +54,6 @@ end
 
 ######################  HAND  ################################
 
-# it should work like abstract class or something similar
 
 module Hand
 
@@ -72,7 +74,6 @@ module Hand
   end
 
 
-
   def calculating_the_total
     # [['H', '3'], ['S', 'Q'], ... ]
     face_value = _cards.map { |card| card.face_value }
@@ -89,7 +90,7 @@ module Hand
     end
 
     #correct for Aces
-    face_value.select{|e| e == "A"}.count.times do
+    face_value.select { |e| e == "A" }.count.times do
       total -= 10 if total > 21
     end
 
@@ -145,12 +146,13 @@ end
 class Dealer
   include Hand
   attr_accessor :_cards, :name
+
   def initialize
     @_cards = []
     @name = 'Dealer'
   end
 
-  def  show_flop
+  def show_flop
     p "******* #{name} cards are in total: *******  "
 
     p "First card is hidden"
@@ -159,13 +161,16 @@ class Dealer
   end
 
 
-
 end
 
 ######################  BLACKJACK engine ################################
 
 class Blackjack_engine
   attr_accessor :player, :dealer, :deck
+
+  BLACKJACK = 21
+  DEALER_TOP_NUMBER = 17
+
   def initialize
     @deck = Deck.new
     @player = Player.new('player1')
@@ -192,7 +197,7 @@ class Blackjack_engine
 
   def blackjack_or_game_over?(player_or_dealer)
     #binding.pry
-    if player_or_dealer.calculating_the_total == 21
+    if player_or_dealer.calculating_the_total == BLACKJACK
       if player_or_dealer.is_a?(Dealer)
         p "Sorry, dealer hit blackjack. #{player.name} loses"
       else
@@ -246,9 +251,9 @@ class Blackjack_engine
   def dealer_turn
 
     p "Dealers's turn"
-    
+
     blackjack_or_game_over?(dealer)
-    while dealer.calculating_the_total < 17
+    while dealer.calculating_the_total < DEALER_TOP_NUMBER
       new_card = deck.deal_one
       puts "Dealing card to dealer:"
       p "#{new_card}"
@@ -258,7 +263,7 @@ class Blackjack_engine
       blackjack_or_game_over?(dealer)
 
     end
-      p "Dealer stays at #{@dealer.calculating_the_total}"
+    p "Dealer stays at #{@dealer.calculating_the_total}"
   end
 
 
@@ -268,7 +273,7 @@ class Blackjack_engine
     elsif @player.calculating_the_total < @dealer.calculating_the_total
       " Sorry, #{@player.name} loses."
     else
-      p  "Even maybe? :)"
+      p "Even maybe? :)"
     end
     exit
   end
