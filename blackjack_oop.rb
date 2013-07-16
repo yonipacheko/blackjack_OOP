@@ -12,7 +12,7 @@ class Card
 
 
   def pretty_output
-    puts "The face #{@suit}  of #{@face_value}"
+     "The face #{@suit}  of #{@face_value}"
   end
 
   def to_s       #formating the object
@@ -22,6 +22,7 @@ class Card
 end
 
 ########################  DECK  ##############################
+
 
 class Deck
   attr_accessor :cards
@@ -39,7 +40,7 @@ class Deck
     scramble!
   end # ends initialize
 
-  def  scramble!
+  def   scramble!
     cards.shuffle!
   end
   def deal_one
@@ -56,29 +57,84 @@ module Hand
 
 
   def initialize
-    @deck = Deck.new
+
   end
 
-  def getting_one_hand
-    player_cards << @deck.deal_one
+  def show_hands
+    p "******* #{name} cards are in total: *******  "
+
+    _cards.each do |card|
+      p "=> #{card}"
+    end
+
+    p '****************************************'
+    p "==> Total: #{calculating_the_total}"
   end
 
-  #binding.pry
+
+
+  def calculating_the_total
+    # [['H', '3'], ['S', 'Q'], ... ]
+    face_value = _cards.map { |card| card.face_value }
+
+    total = 0
+    face_value.each do |value|
+      if value == "A"
+        total += 11
+      elsif value.to_i == 0 # J, Q, K
+        total += 10
+      else
+        total += value.to_i
+      end
+    end
+
+    #correct for Aces
+    face_value.select{|e| e == "A"}.count.times do
+      total -= 10 if total > 21
+    end
+
+    total
+
+  end
+
+
+  def getting_a_hand (_2_cards)
+    _cards << _2_cards
+  end
+
+
   def showing_last_item
-    "You have: #{player_cards[0]} and #{player_cards[1]}"
+    "You have: #{ _cards[0] } and #{ _cards[1] }"
   end
+
+  def player_loses?
+    if calculating_the_total > 21
+    end
+  end
+
+  def testing
+    puts "its working #{ name }"
+  end
+
 end
+
 
 ###################### PLAYER  ################################
 
 class Player
   include Hand
-  attr_accessor :player_cards
+  attr_accessor :_cards, :name
 
   def initialize (n)
     # @person
-    @player_cards = []
+    @_cards = []
     @name = n
+
+  end
+
+  def show_flop
+    _cards[1]
+
   end
 
 end
@@ -87,18 +143,132 @@ end
 
 class Dealer
   include Hand
-  attr_accessor :dealer_cards
+  attr_accessor :_cards, :name
   def initialize
-    @dealer_cards = []
+    @_cards = []
+    @name = 'Dealer'
   end
+
+  def  show_flop
+    p "******* #{name} cards are in total: *******  "
+
+    p "First card is hidden"
+    p "=> Second card is #{ _cards[1] }"
+  end
+
+
 
 end
 
-######################  BLACKJACK ################################
+######################  BLACKJACK engine ################################
 
-player1 = Player.new('fer')
-player1.getting_one_hand
-player1.showing_last_item
+class Blackjack_engine
+  attr_accessor :player, :dealer, :deck
+  def initialize
+    @deck = Deck.new
+    @player = Player.new('player1')
+    @dealer = Dealer.new
+  end
+
+  def set_player_names
+    puts 'What s\' your name?'
+    player.name = gets.chomp
+  end
+
+  def deal_cards
+    player.getting_a_hand(deck.deal_one)
+    dealer.getting_a_hand(deck.deal_one)
+    player.getting_a_hand(deck.deal_one)
+    dealer.getting_a_hand(deck.deal_one)
+  end
+
+  def show_hands
+    player.show_hands
+    dealer.show_flop
+
+  end
+
+  def blackjack_or_game_over(player_or_dealer)
+    binding.pry
+    if player_or_dealer.calculating_the_total == 21
+      if player_or_dealer.is_a?(Dealer)
+        p "Sorry, dealer hit blackjack. #{player.name} loses"
+      else
+        p puts "Congratulations, you hit blackjack! You win!"
+      end
+    elsif player_or_dealer.player_loses?
+      if player_or_dealer.is_a?(Dealer)
+        p "Congratulation, Dealer busted. #{player.name} win"
+      else
+        p "Sorry, #{player.name} busted. #{player.name} "
+      end
+      exit # We finish the app
+    end
+  end
+
+  def player_turn
+    p "#{player.name}'s turn"
+
+    blackjack_or_game_over(player)
+
+    while !player.player_loses?
+      p "What would you like to do? 1) hit or 2) stay"
+
+      response = gets.chomp
+
+      if !['1', '2'].include?(response)
+        puts "Error: you must enter 1 or 2"
+        next
+      end
+      case response
+        when '1'
+          p "#{player.name} choose to stay."
+          break
+        when '2'
+          new_cards = deck.deal_one
+          p "Dealing card to #{player.name}:"
+          "#{new_cards}"
+          player.getting_a_hand(new_cards)
+          player_total = player.calculating_the_total
+
+          p "Your total is now #{player_total}"
+
+          blackjack_or_game_over(@player)
+
+
+      end
+
+
+    end
+
+
+
+  end
+
+
+  def game_on
+    set_player_names
+    deal_cards
+
+    show_hands
+    player_turn
+    #dealer_turn
+    #who_won?( player, dealer )
+
+  end
+end
+
+game = Blackjack_engine.new
+game.game_on
+
+=begin
+
+dealer = Dealer.new
+dealer.getting_one_hand ( deck.deal_one )
+dealer.showing_last_item
+dealer.calculating_the_total
+=end
+
 
 # running the app
 =begin
@@ -129,42 +299,14 @@ class BlackJack
 
   end
 
-  def calculate_total (obj)
-
-
-
-    # [['H', '3'], ['S', 'Q'], ... ]
-    arr = cards.map{|e| e[1] }
-
-    total = 0
-    arr.each do |value|
-      if value == "A"
-        total += 11
-      elsif value.to_i == 0 # J, Q, K
-        total += 10
-      else
-        total += value.to_i
-      end
-    end
-
-    #correct for Aces
-    arr.select{|e| e == "A"}.count.times do
-      total -= 10 if total > 21
-    end
-
-    total
-
-
-
-  end
 
 end
-=end
+
 
 # It's not posssible to do this:  puts deck.cards.pretty_output (inheritance)
 
 
-=begin
+
 class Computer
   @@users = {}
   def initialize (username, password)
@@ -188,5 +330,5 @@ class Computer
 end
 
 my_computer = Computer.new('fer', 123)
-
 =end
+
