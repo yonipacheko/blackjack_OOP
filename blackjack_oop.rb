@@ -109,6 +109,7 @@ module Hand
 
   def player_loses?
     if calculating_the_total > 21
+      return true
     end
   end
 
@@ -153,7 +154,8 @@ class Dealer
     p "******* #{name} cards are in total: *******  "
 
     p "First card is hidden"
-    p "=> Second card is #{ _cards[1] }"
+    p "=> Second card is:"
+    p " #{ _cards[1] }"
   end
 
 
@@ -188,8 +190,8 @@ class Blackjack_engine
 
   end
 
-  def blackjack_or_game_over(player_or_dealer)
-    binding.pry
+  def blackjack_or_game_over?(player_or_dealer)
+    #binding.pry
     if player_or_dealer.calculating_the_total == 21
       if player_or_dealer.is_a?(Dealer)
         p "Sorry, dealer hit blackjack. #{player.name} loses"
@@ -200,7 +202,7 @@ class Blackjack_engine
       if player_or_dealer.is_a?(Dealer)
         p "Congratulation, Dealer busted. #{player.name} win"
       else
-        p "Sorry, #{player.name} busted. #{player.name} "
+        p "Sorry, #{player.name} busted."
       end
       exit # We finish the app
     end
@@ -209,7 +211,7 @@ class Blackjack_engine
   def player_turn
     p "#{player.name}'s turn"
 
-    blackjack_or_game_over(player)
+    blackjack_or_game_over?(player)
 
     while !player.player_loses?
       p "What would you like to do? 1) hit or 2) stay"
@@ -233,18 +235,43 @@ class Blackjack_engine
 
           p "Your total is now #{player_total}"
 
-          blackjack_or_game_over(@player)
+          blackjack_or_game_over?(@player)
 
 
       end
-
-
     end
-
-
 
   end
 
+  def dealer_turn
+
+    p "Dealers's turn"
+    
+    blackjack_or_game_over?(dealer)
+    while dealer.calculating_the_total < 17
+      new_card = deck.deal_one
+      puts "Dealing card to dealer:"
+      p "#{new_card}"
+      @dealer.getting_a_hand(new_card)
+      p "Dealer total is now: #{@dealer.calculating_the_total}"
+
+      blackjack_or_game_over?(dealer)
+
+    end
+      p "Dealer stays at #{@dealer.calculating_the_total}"
+  end
+
+
+  def who_won?
+    if @player.calculating_the_total > @dealer.calculating_the_total
+      p "Congratulations, #{@player.name} wins."
+    elsif @player.calculating_the_total < @dealer.calculating_the_total
+      " Sorry, #{@player.name} loses."
+    else
+      p  "Even maybe? :)"
+    end
+    exit
+  end
 
   def game_on
     set_player_names
@@ -252,8 +279,8 @@ class Blackjack_engine
 
     show_hands
     player_turn
-    #dealer_turn
-    #who_won?( player, dealer )
+    dealer_turn
+    who_won?
 
   end
 end
@@ -261,74 +288,8 @@ end
 game = Blackjack_engine.new
 game.game_on
 
-=begin
-
-dealer = Dealer.new
-dealer.getting_one_hand ( deck.deal_one )
-dealer.showing_last_item
-dealer.calculating_the_total
-=end
-
-
-# running the app
-=begin
-
-class BlackJack
-
-  def initialize
-    @deck = Deck.new
-    @player = Player.new
-    @dealer = Dealer.new
-  end
-
-  def game_On
-    lets_start
-    showing_cards
-    #p 'It \'s working'
-  end
-
-  def lets_start
-    @deck.scramble!
-  end
-
-  def showing_cards
-    @player.getting_one_hand
-    @player.showing_last_item
-    #@dealer.getting_one_hand
-    #@dealer.showing_last_item
-
-  end
-
-
-end
-
-
-# It's not posssible to do this:  puts deck.cards.pretty_output (inheritance)
 
 
 
-class Computer
-  @@users = {}
-  def initialize (username, password)
-    @username = username
-    @password = password
-    @files = {}
-    @@users[username] = password
-  end
 
-  def create (filename)
-    time= Time.now
-    files[filename] = time
-
-    puts 'A new file has created: '
-
-  end
-
-  def Computer.get_users
-    @@users
-  end
-end
-
-my_computer = Computer.new('fer', 123)
-=end
 
